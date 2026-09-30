@@ -23,8 +23,9 @@ For at least 4 of my 5 test questions, the retrieved chunks include one that
 contains the answer.
 
 **Why this target:**
-<!-- e.g. "One of my questions is about a topic only two documents mention, so
-     I expect that one to be hard." -->
+I chose 4 out of 5 because my questions cover several different topics in the
+corpus, and I want retrieval to work reliably without assuming it will be
+perfect on every question.
 
 ---
 
@@ -33,8 +34,9 @@ contains the answer.
 Every answer the system produces names at least one source document.
 
 **Why this target:**
-<!-- Why all five and not four? What about your setup makes that achievable —
-     or what would have to go wrong for it not to be? -->
+I chose every answer because source attribution is a core part of this RAG
+system. If the system gives an answer without a source, I would not be able to
+verify that the answer actually came from the retrieved documents.
 
 ---
 
@@ -44,53 +46,38 @@ When I ask a question my documents clearly don't cover, the relevance gate
 stops it and the system returns "I don't have enough information about that" —
 in at least 4 of 5 tries.
 
-<!-- The five questions are the ones in `OUT_OF_SCOPE` at the bottom of
-     `questions.py`, and `run_eval.py` puts them through the gate and writes
-     what happened into your run log. Swap them for your own if you'd rather —
-     just keep five of them, or the "4 of 5" above has nothing to be 4 of. -->
-
 **Why this target:**
-<!-- What did your distances look like when you set the cutoff in Milestone 4?
-     Was there a clean gap, or did the two groups overlap? -->
+I chose 4 out of 5 because I want the system to reject almost all clearly
+unrelated questions while allowing for one borderline case where a retrieved
+chunk may appear somewhat similar even though it does not actually answer the
+question.
 
 ---
 
-## 4. Something about your chunks
+## 4. Chunks are complete and usable
 
-<!-- YOU WRITE THIS ONE.
-
-     How would you know if your chunks were the right size? Name something
-     countable or observable.
-
-     Examples of the right shape — don't copy these, they should come from
-     what you actually saw in Milestone 3:
-       - "At least 4 of 5 sampled chunks read as a complete thought, with no
-          sentence cut in half at either end."
-       - "No chunk is shorter than 200 characters, since anything below that
-          in my corpus turned out to be a heading with no content under it." -->
-
-
+At least 4 of 5 sampled chunks should contain a complete thought that could be
+understood without needing to read the chunk before or after it.
 
 **Why this target:**
-
-
+I chose 4 out of 5 because the goal of chunking is to preserve enough context
+for retrieval, but I expect that an occasional chunk may still split
+information in an awkward place. Requiring most sampled chunks to stand on
+their own gives me a clear way to judge whether my chunking strategy is working.
 
 ---
 
-## 5. Your choice
+## 5. Answers include the expected key information
 
-<!-- YOU WRITE THIS ONE TOO.
-
-     Pick something you actually care about getting right. It could be about
-     speed, about refusals, about a particular kind of question your corpus
-     handles badly, about source attribution being correct rather than merely
-     present — anything, as long as it names a number or an observable
-     outcome. -->
-
-
+For at least 4 of my 5 test questions, the generated answer should contain the
+expected word or phrase listed in the `expects` field in `questions.py`.
 
 **Why this target:**
-
+I chose 4 out of 5 because the five questions cover different parts of the
+corpus, and I want the system to correctly answer most of them without
+requiring perfect performance. The `expects` phrases give me a consistent way
+to check whether each answer includes the key fact I decided was important
+before testing.
 
 
 ---
