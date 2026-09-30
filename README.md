@@ -97,17 +97,18 @@ The bad: known damp problem on the ground floor; two rooms were taken offline in
 
 ## Sample Answer
 
-<!-- One complete question and answer, pasted as text, with the source line
-     visible. Milestone 4. -->
-
 **Question:**
+What is the main housing problem students should know about in Morrow House?
 
 **Answer:**
 
-```
+```text
+The main housing problem in Morrow House is a known damp problem on the ground floor, which resulted in two rooms being taken offline in 2024 (housing_morrow_house.txt).
+
+Sources retrieved: housing_aldridge_hall.txt, housing_morrow_house.txt, housing_morrow_house_noise.txt, housing_tamsin_court.txt, study_library_hours.txt
 ```
 
-**My relevance cutoff:**
+**My relevance cutoff:** 0.6
 
 <!-- The number you set in config.py, and how you got there.
 
