@@ -28,6 +28,7 @@ from dataclasses import dataclass
 os.environ.setdefault("ANONYMIZED_TELEMETRY", "False")
 
 import chromadb  # noqa: E402
+from rank_bm25 import BM25Okapi
 
 import config
 from chunker import Chunk
@@ -185,9 +186,14 @@ def search(
     variant: str = "default",
 ) -> list[Result]:
     """
-    Retrieve the chunks closest in meaning to a question.
+    Retrieve chunks using hybrid search.
 
-    Returns them nearest-first, each with its distance.
+    Semantic similarity finds chunks with similar meaning.
+    BM25 adds keyword matching so exact names, numbers, and terms
+    can influence the ranking.
+
+    The original cosine distance is kept on every Result so the
+    relevance gate can continue using the same 0.6 cutoff.
     """
     top_k = top_k or config.TOP_K
     name = config.collection_name(corpus, variant)
@@ -199,26 +205,66 @@ def search(
             f"No index called '{name}'. Run `python app.py index` first."
         ) from exc
 
+    # Get semantic distances for all chunks.
     raw = collection.query(
         query_embeddings=embed([question]),
-        n_results=min(top_k, collection.count()),
+        n_results=collection.count(),
     )
 
-    results: list[Result] = []
-    for text, meta, distance in zip(
-        raw["documents"][0], raw["metadatas"][0], raw["distances"][0]
+    documents = raw["documents"][0]
+    metadatas = raw["metadatas"][0]
+    distances = raw["distances"][0]
+
+    # BM25 keyword search over the same chunks.
+    tokenized_documents = [
+        text.lower().split()
+        for text in documents
+    ]
+    tokenized_question = question.lower().split()
+
+    bm25 = BM25Okapi(tokenized_documents)
+    bm25_scores = bm25.get_scores(tokenized_question)
+
+    # Normalize BM25 scores to 0–1.
+    max_bm25 = max(bm25_scores) if len(bm25_scores) else 0
+
+    scored = []
+
+    for text, meta, distance, bm25_score in zip(
+        documents, metadatas, distances, bm25_scores
     ):
-        results.append(
-            Result(
-                text=text,
-                source=str(meta.get("source", "unknown")),
-                label=f"{meta.get('source', 'unknown')}#{meta.get('index', 0)}",
-                distance=float(distance),
-                produced_by=str(meta.get("produced_by", "unknown")),
+        distance = float(distance)
+
+        # Convert cosine distance into similarity.
+        # Lower distance is better, so 1 - distance gives a higher score
+        # to more semantically similar chunks.
+        semantic_score = max(0.0, 1.0 - distance)
+
+        if max_bm25 > 0:
+            keyword_score = float(bm25_score) / float(max_bm25)
+        else:
+            keyword_score = 0.0
+
+        # Semantic meaning stays more important than exact keywords.
+        hybrid_score = (0.7 * semantic_score) + (0.3 * keyword_score)
+
+        scored.append(
+            (
+                hybrid_score,
+                Result(
+                    text=text,
+                    source=str(meta.get("source", "unknown")),
+                    label=f"{meta.get('source', 'unknown')}#{meta.get('index', 0)}",
+                    distance=distance,
+                    produced_by=str(meta.get("produced_by", "unknown")),
+                ),
             )
         )
-    return results
 
+    # Highest hybrid score first.
+    scored.sort(key=lambda item: item[0], reverse=True)
+
+    return [result for _, result in scored[:top_k]]
 
 def index_exists(corpus: str | None = None, variant: str = "default") -> bool:
     """Is there an index here to search, without searching it?
