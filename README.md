@@ -205,46 +205,68 @@ Sources retrieved: housing_aldridge_hall.txt, housing_morrow_house.txt, housing_
 
 **What I changed:**
 
+I changed retrieval from semantic vector search alone to hybrid retrieval that
+combines semantic similarity with BM25 keyword matching. Semantic similarity
+has a weight of 0.7 and BM25 has a weight of 0.3.
+
 **Why I picked it:**
 
-<!-- Connect it to a specific diagnosis above in one sentence. If you can't,
-     you picked a fix because it sounded impressive. -->
+My original system met all five criteria, so there was no specific failure to
+repair. I chose hybrid retrieval as a stricter retrieval experiment because
+several questions contain exact names and phrases such as "Morrow House,"
+"Tamsin Court," and "credit hours." BM25 can reward those exact terms while
+semantic retrieval still handles questions phrased differently from the source
+documents.
 
 ### Run Log — After
 
-<!-- Same format, same five criteria, three runs each.
-     `python run_eval.py --label after` -->
-
 | Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
 |---|---|---|---|---|---|
-| 1. Retrieved chunk contains the answer | 4 of 5 |  |  |  |  |
-| 2. Every answer names a source | 5 of 5 |  |  |  |  |
-| 3. Gate stops out-of-corpus questions | 4 of 5 |  |  |  |  |
-| 4. | | | | | |
-| 5. | | | | | |
+| 1. Retrieved chunk contains the answer | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 2. Every answer names a source | 5 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 3. Gate stops out-of-corpus questions | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 4. Chunks are complete and usable | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 5. Answers include expected key information | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
 
 **Did it help?**
 
-<!-- Say plainly whether it did, and how you know. If it made things worse,
-     say that — a change that backfired, honestly reported, earns full credit
-     and is more interesting than one that worked. What matters is that you can
-     tell.
+The hybrid search change did not improve my measured acceptance-criterion scores
+because the original system already met all five criteria in every run. After
+adding BM25 keyword scoring alongside semantic retrieval, the system still met
+all five criteria across all three runs and still refused all five out-of-scope
+questions.
 
-     Milestone 4. -->
+The change did affect retrieval behavior, especially for exact terms, but my
+current test set was already easy enough for semantic search to retrieve the
+correct source consistently. Because the before and after scores were both at
+the ceiling, I cannot claim that hybrid search was better based on these
+criteria. I can only say that it preserved performance while adding keyword
+sensitivity.
 
 ## What's Still Broken
 
-<!-- For each criterion still missed after your fix: what you'd do about it,
-     and why you stopped where you did.
+None of my original acceptance criteria are still missed after the improvement.
+However, the evaluation has a limitation: the test questions are relatively
+direct and closely match the wording of the source documents. Because the
+original semantic retrieval already answered all five correctly, the current
+criteria do not reveal whether hybrid search is actually better on harder
+questions.
 
-     "I ran out of time" is fine if it's true. Pretending nothing is left is
-     not.
-
-     Milestone 5. -->
+A stronger next test would include questions with exact names, numbers, or terms
+that are phrased very differently from the surrounding document text. I stopped
+here because Unit 2 requires one measured improvement, and adding new evaluation
+questions after seeing the results would change the original test rather than
+measure the improvement fairly.
 
 ## What I'd Do Differently
 
-<!-- Knowing what you know now — which of your five criteria would you write
-     differently, and why?
+If I wrote the acceptance criteria again, I would make Criterion 1 more
+demanding. Instead of requiring the retrieved chunks to contain the answer for
+at least 4 of 5 questions, I would require the correct answer-containing chunk
+to appear in the top 3 results for all 5 questions.
 
-     Milestone 5. -->
+My original criterion was too easy for this corpus because semantic retrieval
+already found the correct source for every question. A ranking-based criterion
+would make it easier to measure whether an improvement such as hybrid search
+actually improves retrieval quality rather than simply preserving an already
+successful result.
