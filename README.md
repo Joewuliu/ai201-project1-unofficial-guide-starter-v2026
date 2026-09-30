@@ -21,11 +21,7 @@
 
 ## What This Does
 
-<!-- Three or four sentences. Which corpus you picked, and the kinds of
-     questions your system answers. Write it for someone who has never seen
-     this repo.
-
-     Milestone 5. -->
+The Unofficial Guide is a RAG system built over the `campus_life` corpus. It lets users ask questions about practical student information such as housing, dining, registration, parking, and course experiences. The system retrieves the most relevant chunks from the corpus, checks whether the results are relevant enough to answer, and then generates a response grounded only in those retrieved documents. Each answer also names its source so the user can see where the information came from.
 
 ## Chunking Strategy
 
@@ -125,18 +121,9 @@ Sources retrieved: housing_aldridge_hall.txt, housing_morrow_house.txt, housing_
 
 ## How I Used AI
 
-<!-- Two specific moments. For each: what you asked for, what came back, and
-     what you changed about it.
+**1.** I used AI to help me reason through a chunking strategy for the `campus_life` corpus. After I inspected the starter output and saw that the documents were short, I asked for a simple strategy that would preserve complete thoughts instead of cutting text at fixed character boundaries. The suggested approach used paragraph boundaries with a maximum size of about 450 characters and no overlap. I then tested the result myself with `python app.py chunks -n 5` and checked that the sampled chunks still made sense on their own.
 
-     "I asked Claude to write the chunking function from my notes. It ignored
-     the overlap, so I added that myself" is the level of detail we're after.
-     "I used AI to help me code" is not.
-
-     Milestone 5. -->
-
-**1.**
-
-**2.**
+**2.** I used AI to help me interpret the retrieval distance results in Milestone 4. I provided the best distances for my five in-corpus questions and five out-of-scope questions, and used that comparison to decide whether the starter relevance cutoff of 0.6 still made sense. I kept 0.6 because all of my in-corpus questions were below 0.4633 while all out-of-scope questions were above 0.8246, leaving a clear gap between the two groups.
 
 <!-- ── Stretch features ─────────────────────────────────────────────────────
      Doing one? Say so here BEFORE you start. A feature this README never
